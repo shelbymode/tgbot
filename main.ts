@@ -5,7 +5,7 @@ import express from 'express'
 import cors from 'cors'
 
 const botToken = '7032208203:AAEIZRDMHH1eFA6zh94icbEnXlQK8MeMCto'
-// const channelId = '1002032821328' // Channel ID starts with "-"
+const channelId = '1002032821328' // Channel ID starts with "-"
 
 function convertHtmlToTelegramString(html: string): string {
   let temp = html.replace(/<img\b[^>]*>/gi, '')
@@ -64,7 +64,7 @@ async function start(token: string): Promise<void> {
   telegramBot.on('message', async (msg) => {
     await Promise.all(
       messagesStore.map((message) =>
-        (telegramBot as TelegramBot).sendMessage(msg.chat.id, message, {
+        (telegramBot as TelegramBot).sendMessage(channelId, message, {
           parse_mode: 'HTML',
         }),
       ),
