@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable require-atomic-updates */
 import TelegramBot from 'node-telegram-bot-api'
 import express from 'express'
 
 const botToken = '7032208203:AAEIZRDMHH1eFA6zh94icbEnXlQK8MeMCto'
-const channelId = '1002032821328' // Channel ID starts with "-"
+// const channelId = '1002032821328' // Channel ID starts with "-"
 
 function convertHtmlToTelegramString(html: string): string {
   let temp = html.replace(/<img\b[^>]*>/gi, '')
@@ -23,13 +25,6 @@ function convertHtmlToTelegramString(html: string): string {
   return temp
 }
 
-const bot = new TelegramBot(botToken)
-
-// Start the bot
-void bot.startPolling().then(() => {
-  console.log('Bot is running...')
-})
-
 let messagesStore = [] as string[]
 
 const server = express()
@@ -47,14 +42,36 @@ server.post('/message', (req, res) => {
   res.sendStatus(204)
 })
 
-bot.on('message', async (msg) => {
-  await Promise.all(
-    messagesStore.map((message) => bot.sendMessage(msg.chat.id, message, { parse_mode: 'HTML' })),
-  )
-  // eslint-disable-next-line require-atomic-updates
-  messagesStore = []
-})
-
 server.listen(3000, () => {
   console.log('Server is running...')
 })
+
+let telegramBot: TelegramBot | null = null
+
+async function start(token: string): Promise<void> {
+  telegramBot = new TelegramBot(token)
+  await telegramBot.startPolling({ restart: true })
+
+  telegramBot.on('message', async (msg) => {
+    await Promise.all(
+      messagesStore.map((message) =>
+        (telegramBot as TelegramBot).sendMessage(msg.chat.id, message, { parse_mode: 'HTML' }),
+      ),
+    )
+    // eslint-disable-next-line require-atomic-updates
+    messagesStore = []
+  })
+}
+
+async function stop(): Promise<void> {
+  if (telegramBot != null) {
+    await telegramBot.stopPolling({ cancel: true })
+    telegramBot = null
+  }
+  process.exit()
+}
+
+void start(botToken)
+
+process.on('SIGQUIT', stop)
+process.on('SIGINT', stop)
