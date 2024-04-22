@@ -39,9 +39,11 @@ server.use(
 )
 
 server.post('/message', (req, res) => {
-  console.log('accept message')
-
   const message = req.body.message as string
+
+  console.log('accept body', req.body)
+  console.log('accept message', req.body.message)
+
   const cleanedMessage = convertHtmlToTelegramString(message)
 
   messagesStore.push(cleanedMessage)
@@ -61,9 +63,13 @@ async function start(token: string): Promise<void> {
 
   telegramBot.on('message', async (msg) => {
     await Promise.all(
-      messagesStore.map((message) =>
-        (telegramBot as TelegramBot).sendMessage(msg.chat.id, message, { parse_mode: 'HTML' }),
-      ),
+      messagesStore.map((message) => {
+        console.log('🚀 ~ messagesStore.map ~ message:', message)
+
+        return (telegramBot as TelegramBot).sendMessage(msg.chat.id, message, {
+          parse_mode: 'HTML',
+        })
+      }),
     )
     // eslint-disable-next-line require-atomic-updates
     messagesStore = []
