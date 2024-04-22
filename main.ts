@@ -2,6 +2,7 @@
 /* eslint-disable require-atomic-updates */
 import TelegramBot from 'node-telegram-bot-api'
 import express from 'express'
+import cors from 'cors'
 
 const botToken = '7032208203:AAEIZRDMHH1eFA6zh94icbEnXlQK8MeMCto'
 // const channelId = '1002032821328' // Channel ID starts with "-"
@@ -30,6 +31,12 @@ let messagesStore = [] as string[]
 const server = express()
 
 server.use(express.json())
+server.use(
+  cors({
+    origin: '*',
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  }),
+)
 
 server.post('/message', (req, res) => {
   console.log('accept message')
