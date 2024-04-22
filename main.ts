@@ -5,7 +5,7 @@ import express from 'express'
 import cors from 'cors'
 
 const botToken = '7032208203:AAEIZRDMHH1eFA6zh94icbEnXlQK8MeMCto'
-const channelId = '1002032821328' // Channel ID starts with "-"
+const channelId = '-1002032821328' // Channel ID starts with "-"
 
 function convertHtmlToTelegramString(html: string): string {
   let temp = html.replace(/<img\b[^>]*>/gi, '')
